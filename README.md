@@ -97,18 +97,6 @@ movementor/
 
 ---
 
-## 🧪 API Endpoints (Backend)
-
-- `GET /workouts`  
-Returns a list of workouts based on preferences
-
-- `POST /preferences`  
-Receives onboarding data (goal, level, type)
-
-Mock data is stored in `backend/data/workouts.json`
-
----
-
 ## 💡 App Features
 
 - Login & onboarding flow
