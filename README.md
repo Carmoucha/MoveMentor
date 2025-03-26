@@ -83,6 +83,8 @@ movementor/
 │   ├── constants/                # Color, size, etc.
 │   ├── hooks/                    # Custom hooks
 |   |   ├── useUserPreferences.ts #  Store/retrieve onboarding data   
+│   ├── util/                    
+|   |   ├── validateForm.ts #  Store/retrieve onboarding data   
 
 
 ├── backend/                    # Minimal backend API
