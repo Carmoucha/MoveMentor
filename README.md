@@ -83,6 +83,8 @@ movementor/
 │   ├── constants/                # Color, size, etc.
 │   ├── hooks/                    # Custom hooks
 |   |   ├── useUserPreferences.ts #  Store/retrieve onboarding data   
+│   ├── util/                    
+|   |   ├── validateForm.ts #  Store/retrieve onboarding data   
 
 
 ├── backend/                    # Minimal backend API
@@ -94,18 +96,6 @@ movementor/
 │   │   └── workouts.json       # Static workouts
 
 ```
-
----
-
-## 🧪 API Endpoints (Backend)
-
-- `GET /workouts`  
-Returns a list of workouts based on preferences
-
-- `POST /preferences`  
-Receives onboarding data (goal, level, type)
-
-Mock data is stored in `backend/data/workouts.json`
 
 ---
 
