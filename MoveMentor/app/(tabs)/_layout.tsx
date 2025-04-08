@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import { View, StyleSheet, Text, Dimensions } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { COLORS } from '../styles/constants';
 
@@ -29,12 +29,13 @@ const TabBarIcon: React.FC<TabBarIconProps> = ({ route, focused }) => {
   }
 
   return (
-    <View style={[styles.tabItem, focused && styles.activeTab]}>
+    <View style={styles.tabItem}>
+      {focused && <View style={styles.activeTab} />} 
       <Ionicons
         name={iconName as keyof typeof Ionicons.glyphMap}
-        size={20}
+        size={30}
         color={focused ? COLORS.primaryGreen : COLORS.focusedGray}
-        style={{ marginBottom: 4 }}
+        style={{ marginBottom: -20, alignSelf: 'center' }}
       />
       <Text style={[styles.tabLabel, { color: focused ? COLORS.primaryGreen : COLORS.focusedGray }]}>
         {label}
@@ -61,19 +62,23 @@ export default function TabLayout() {
   );
 }
 
+const windowWidth = Dimensions.get('window').width;
 const styles = StyleSheet.create({
   tabBarStyle: {
     position: 'absolute',
     bottom: 20,
     left: 20,
     right: 20,
-    height: 60,
+    height: 100,
     backgroundColor: COLORS.unfocusedGray,
-    borderRadius: 30,
+    borderRadius: 40,
     flexDirection: 'row',
     borderTopWidth: 0,
     elevation: 3,
     overflow: 'hidden',
+    width: windowWidth - 20, 
+    marginLeft: 10, // Center the tab bar
+    alignContent: 'center',
   },
   tabBarItemStyle: {
     flex: 1,
@@ -84,17 +89,25 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    flexGrow: 1,
+    position: 'relative', 
+    paddingTop: 15, 
   },
   activeTab: {
+    position: 'absolute',
+    left:2,
+    right: 0,
+    height: 80, 
+    paddingTop: 10, 
+    top: -4, 
     backgroundColor: COLORS.lightGreen,
     borderRadius: 30,
-    height: 100,
+    zIndex: -1, // Ensure it stays behind the icon and label
   },
   tabLabel: {
     fontSize: 12,
     fontWeight: '600',
     width: 100,
     textAlign: 'center',
+    bottom: -25,
   },
 });

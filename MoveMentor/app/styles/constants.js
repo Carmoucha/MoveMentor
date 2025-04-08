@@ -1,8 +1,8 @@
 export const COLORS = {
-    primaryGreen: "#30A72C",
-    unfocusedGray: "#CED3CE",
+    primaryGreen: "#259e21",
+    unfocusedGray: "#d9d9d9",
     focusedGray: "#49454F",
-    lightGreen: "#9AFF97",
+    lightGreen: "#a9d1a7",
     fireRed: "#EB0000",
 };
 export default COLORS;
