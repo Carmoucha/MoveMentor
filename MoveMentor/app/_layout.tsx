@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { View, Text } from 'react-native';
 import { useFonts } from 'expo-font';
 import { useEffect } from 'react';
+import { AuthProvider } from '../context/AuthContext';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -25,13 +26,21 @@ export default function RootLayout() {
   }
 
   return (
-    <View style={{ flex: 1 }}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="index" options={{ title: 'dashboard' }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </View>
+    <AuthProvider>
+      <View style={{ flex: 1 }}>
+        <Stack screenOptions={{ headerShown: false }}>
+          {/* Auth Group */}
+          <Stack.Screen name="login" />
+          <Stack.Screen name="signup" />
+          <Stack.Screen name="onboarding" />
+          
+          {/* Main App Group */}
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="index" options={{ title: 'dashboard' }} />
+          <Stack.Screen name="+not-found" />
+        </Stack>
+        <StatusBar style="auto" />
+      </View>
+    </AuthProvider>
   );
 }
