@@ -11,8 +11,9 @@ import {
   ActivityIndicator
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useAuth } from '../context/AuthContext';
+//import { useAuth } from '../context/AuthContext';
 import { COLORS } from './styles/constants';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -20,43 +21,35 @@ export default function LoginScreen() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [activeTab, setActiveTab] = useState('login');
   const router = useRouter();
-  const { signIn } = useAuth();
+  //const { signIn } = useAuth();
 
   const handleLogin = async () => {
-    // Validate inputs
     if (!email || !password) {
       Alert.alert('Missing Information', 'Please enter both email and password');
       return;
     }
-
+  
     try {
       setIsLoggingIn(true);
       
-      const response = await fetch('http://your-api-url/users/login', {
+      // Backend URL
+      const response = await fetch('http://localhost:8000/users/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
+        body: JSON.stringify({ email, password }),
       });
-
+  
       const data = await response.json();
-
+  
       if (!response.ok) {
         throw new Error(data.message || 'Login failed');
       }
-
-      // Parse token to get userId
-      const tokenPayload = JSON.parse(atob(data.token.split('.')[1]));
-      const userId = tokenPayload.id;
-      
-      // Use auth context to store credentials and manage state
-      await signIn(data.token, userId);
-      
-      // Navigate to the main app
+  
+      // Store userId only, no token stuff
+      await AsyncStorage.setItem('userId', data.userId);
+  
       router.replace('/dashboard');
     } catch (error) {
       console.error('Login error:', error);
@@ -65,6 +58,7 @@ export default function LoginScreen() {
       setIsLoggingIn(false);
     }
   };
+  
 
   return (
     <SafeAreaView style={styles.container}>
@@ -81,17 +75,20 @@ export default function LoginScreen() {
       {/* Tab Selector */}
       <View style={styles.tabContainer}>
         <TouchableOpacity 
-          style={[styles.tabButton, activeTab === 'login' && styles.activeTab]} 
-          onPress={() => setActiveTab('login')}
+          style={[styles.tabButton, styles.activeTab]} 
         >
-          <Text style={[styles.tabText, activeTab === 'login' && styles.activeTabText]}>Log In</Text>
+          <Text style={[styles.tabText, styles.activeTabText]}>Log In</Text>
         </TouchableOpacity>
         <TouchableOpacity 
-          style={[styles.tabButton, activeTab === 'signup' && styles.activeTab]} 
-          onPress={() => router.push('/signup')}
-        >
-          <Text style={[styles.tabText, activeTab === 'signup' && styles.activeTabText]}>Sign Up</Text>
-        </TouchableOpacity>
+        style={[styles.tabButton, activeTab === 'signup' && styles.activeTab]} 
+        onPress={() => {
+          setActiveTab('signup');
+          router.push('/signup');
+        }}
+>
+  <Text style={[styles.tabText, activeTab === 'signup' && styles.activeTabText]}>Sign Up</Text>
+</TouchableOpacity>
+
       </View>
 
       {/* Input Fields */}

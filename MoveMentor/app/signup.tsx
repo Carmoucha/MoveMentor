@@ -11,81 +11,60 @@ import {
   ActivityIndicator
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useAuth } from '../context/AuthContext';
+//import { useAuth } from '../context/AuthContext';
 import { COLORS } from './styles/constants';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function SignupScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
-  const [activeTab, setActiveTab] = useState('signup');
   const router = useRouter();
-  const { register } = useAuth();
+  //const { register } = useAuth();
 
   const handleSignUp = async () => {
-    // Validate inputs
     if (!email || !password || !confirmPassword) {
       Alert.alert('Missing Information', 'Please fill in all fields');
       return;
     }
-
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      Alert.alert('Invalid Email', 'Please enter a valid email address');
-      return;
-    }
-
-    // Check password length
-    if (password.length < 6) {
-      Alert.alert('Password Too Short', 'Password must be at least 6 characters long');
-      return;
-    }
-
-    // Check password match
+  
     if (password !== confirmPassword) {
       Alert.alert('Password Mismatch', 'Passwords do not match');
       return;
     }
-
+  
     try {
       setIsRegistering(true);
-      
-      const response = await fetch('http://your-api-url/users/register', {
+  
+      const response = await fetch('http://localhost:8000/users/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
+        body: JSON.stringify({ email, password }),
       });
-
+  
       const data = await response.json();
-
+  
       if (!response.ok) {
         throw new Error(data.message || 'Registration failed');
       }
+  
+      // Store userId immediately
+      await AsyncStorage.setItem('userId', data.userId);
+  
+      router.push('/onboarding');
 
-      // Use auth context to store user ID
-      await register(data.userId);
-      
-      // Navigate to onboarding
-      Alert.alert(
-        'Registration Successful', 
-        'Your account has been created!',
-        [{ text: 'Continue', onPress: () => router.push('/onboarding') }]
-      );
-      
+
     } catch (error) {
-      console.error('Registration error:', error);
-      Alert.alert('Registration Failed', error.message || 'Please try again with different credentials');
+      console.error('Signup error:', error);
+      Alert.alert('Signup Failed', error.message || 'Try a different email.');
     } finally {
       setIsRegistering(false);
     }
   };
+  
 
   return (
     <SafeAreaView style={styles.container}>
@@ -102,16 +81,15 @@ export default function SignupScreen() {
       {/* Tab Selector */}
       <View style={styles.tabContainer}>
         <TouchableOpacity 
-          style={[styles.tabButton, activeTab === 'login' && styles.activeTab]} 
+          style={[styles.tabButton]} 
           onPress={() => router.push('/login')}
         >
-          <Text style={[styles.tabText, activeTab === 'login' && styles.activeTabText]}>Log In</Text>
+          <Text style={[styles.tabText]}>Log In</Text>
         </TouchableOpacity>
         <TouchableOpacity 
-          style={[styles.tabButton, activeTab === 'signup' && styles.activeTab]} 
-          onPress={() => setActiveTab('signup')}
+          style={[styles.tabButton, styles.activeTab]} 
         >
-          <Text style={[styles.tabText, activeTab === 'signup' && styles.activeTabText]}>Sign Up</Text>
+          <Text style={[styles.tabText, styles.activeTabText]}>Sign Up</Text>
         </TouchableOpacity>
       </View>
 
