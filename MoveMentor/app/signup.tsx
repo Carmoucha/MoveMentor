@@ -14,25 +14,45 @@ import { useRouter } from 'expo-router';
 import { useAuth } from '../context/AuthContext';
 import { COLORS } from '../styles/constants';
 
-export default function LoginScreen() {
+export default function SignupScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const [activeTab, setActiveTab] = useState('login');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [activeTab, setActiveTab] = useState('signup');
   const router = useRouter();
-  const { signIn } = useAuth();
+  const { register } = useAuth();
 
-  const handleLogin = async () => {
+  const handleSignUp = async () => {
     // Validate inputs
-    if (!email || !password) {
-      Alert.alert('Missing Information', 'Please enter both email and password');
+    if (!email || !password || !confirmPassword) {
+      Alert.alert('Missing Information', 'Please fill in all fields');
+      return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      Alert.alert('Invalid Email', 'Please enter a valid email address');
+      return;
+    }
+
+    // Check password length
+    if (password.length < 6) {
+      Alert.alert('Password Too Short', 'Password must be at least 6 characters long');
+      return;
+    }
+
+    // Check password match
+    if (password !== confirmPassword) {
+      Alert.alert('Password Mismatch', 'Passwords do not match');
       return;
     }
 
     try {
-      setIsLoggingIn(true);
+      setIsRegistering(true);
       
-      const response = await fetch('http://your-api-url/users/login', {
+      const response = await fetch('http://your-api-url/users/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -46,23 +66,24 @@ export default function LoginScreen() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
+        throw new Error(data.message || 'Registration failed');
       }
 
-      // Parse token to get userId
-      const tokenPayload = JSON.parse(atob(data.token.split('.')[1]));
-      const userId = tokenPayload.id;
+      // Use auth context to store user ID
+      await register(data.userId);
       
-      // Use auth context to store credentials and manage state
-      await signIn(data.token, userId);
+      // Navigate to onboarding
+      Alert.alert(
+        'Registration Successful', 
+        'Your account has been created!',
+        [{ text: 'Continue', onPress: () => router.push('/onboarding') }]
+      );
       
-      // Navigate to the main app
-      router.replace('/dashboard');
     } catch (error) {
-      console.error('Login error:', error);
-      Alert.alert('Login Failed', error.message || 'Please check your credentials and try again');
+      console.error('Registration error:', error);
+      Alert.alert('Registration Failed', error.message || 'Please try again with different credentials');
     } finally {
-      setIsLoggingIn(false);
+      setIsRegistering(false);
     }
   };
 
@@ -82,13 +103,13 @@ export default function LoginScreen() {
       <View style={styles.tabContainer}>
         <TouchableOpacity 
           style={[styles.tabButton, activeTab === 'login' && styles.activeTab]} 
-          onPress={() => setActiveTab('login')}
+          onPress={() => router.push('/login')}
         >
           <Text style={[styles.tabText, activeTab === 'login' && styles.activeTabText]}>Log In</Text>
         </TouchableOpacity>
         <TouchableOpacity 
           style={[styles.tabButton, activeTab === 'signup' && styles.activeTab]} 
-          onPress={() => router.push('/signup')}
+          onPress={() => setActiveTab('signup')}
         >
           <Text style={[styles.tabText, activeTab === 'signup' && styles.activeTabText]}>Sign Up</Text>
         </TouchableOpacity>
@@ -120,17 +141,29 @@ export default function LoginScreen() {
         />
       </View>
 
-      {/* Login Button */}
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Re-Enter your Password</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter your password"
+          placeholderTextColor="#A18249"
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          secureTextEntry
+        />
+      </View>
+
+      {/* Sign Up Button */}
       <View style={styles.buttonContainer}>
         <TouchableOpacity 
-          style={styles.loginButton} 
-          onPress={handleLogin}
-          disabled={isLoggingIn}
+          style={styles.signupButton} 
+          onPress={handleSignUp}
+          disabled={isRegistering}
         >
-          {isLoggingIn ? (
+          {isRegistering ? (
             <ActivityIndicator color="#FFFFFF" />
           ) : (
-            <Text style={styles.loginButtonText}>Login</Text>
+            <Text style={styles.signupButtonText}>Sign Up</Text>
           )}
         </TouchableOpacity>
       </View>
@@ -217,14 +250,14 @@ const styles = StyleSheet.create({
     marginTop: 'auto',
     marginBottom: 20,
   },
-  loginButton: {
+  signupButton: {
     backgroundColor: COLORS.primaryGreen,
     height: 48,
     borderRadius: 50,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  loginButtonText: {
+  signupButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: 'bold',
