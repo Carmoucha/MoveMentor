@@ -23,9 +23,12 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   onboarding: onboardingSchema,
-  workoutProgress: workoutProgressSchema
+  workoutProgress: workoutProgressSchema,
+  badges: {
+    type: [String],
+    default: []
+  }
 });
-
 
 
 module.exports = mongoose.model('User', userSchema);

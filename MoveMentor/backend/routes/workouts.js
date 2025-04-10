@@ -3,6 +3,8 @@ const router = express.Router();
 const User = require('../models/User');
 const workoutCategoryMap = require('../utils/workoutMap');
 const dayjs = require('dayjs');
+const badgeDefinitions = require('../utils/badges');
+
 
 // Increment workout
 router.post('/increment', async (req, res) => {
@@ -28,48 +30,63 @@ router.post('/increment', async (req, res) => {
 
     const wp = user.workoutProgress;
 
-    // ✅ All-time counts
+    // All-time counts
     const counts = { ...(wp.counts || {}) };
     counts[category] = (counts[category] || 0) + 1;
     wp.counts = counts;
 
     wp.totalCompleted += 1;
 
-    // ✅ Clone today’s stats (safe shallow clone)
-  const allStats = { ...(wp.dailyStats || {}) };
-  const todayStats = { ...(allStats[today] || {}) };
+    // Clone today’s stats (safe shallow clone)
+    const allStats = { ...(wp.dailyStats || {}) };
+    const todayStats = { ...(allStats[today] || {}) };
 
-  // ✅ Update the category
-  todayStats[category] = (todayStats[category] || 0) + 1;
-  todayStats.total = (todayStats.total || 0) + 1;
+    // Update the category
+    todayStats[category] = (todayStats[category] || 0) + 1;
+    todayStats.total = (todayStats.total || 0) + 1;
 
-  // ✅ Save it back
-  allStats[today] = todayStats;
-  wp.dailyStats = allStats;
+    // Save it back
+    allStats[today] = todayStats;
+    wp.dailyStats = allStats;
 
 
-    // ✅ Streak logic
-    const lastDate = wp.lastWorkoutDate;
-    if (!lastDate) {
-      wp.streakCount = 1;
-    } else {
-      const diff = dayjs(today).diff(dayjs(lastDate), 'day');
-      if (diff === 1) {
-        wp.streakCount += 1; // continued streak
-      } else if (diff > 1) {
-        wp.streakCount = 1;  // missed a day → reset streak
-      } // if same day → don't touch streak
-    }
+      // Streak logic
+      const lastDate = wp.lastWorkoutDate;
+      if (!lastDate) {
+        wp.streakCount = 1;
+      } else {
+        const diff = dayjs(today).diff(dayjs(lastDate), 'day');
+        if (diff === 1) {
+          wp.streakCount += 1; // continued streak
+        } else if (diff > 1) {
+          wp.streakCount = 1;  // missed a day → reset streak
+        } // if same day → don't touch streak
+      }
 
-    if (lastDate !== today) {
-      wp.lastWorkoutDate = today;
-    }
+      if (lastDate !== today) {
+        wp.lastWorkoutDate = today;
+      }
 
-    await user.save();
-    res.status(200).json({ message: 'Workout incremented', progress: wp });
+      await user.save();
+      const unlocked = user.badges || [];
+
+      for (const badge of badgeDefinitions) {
+        if (!unlocked.includes(badge.id) && badge.condition(user.workoutProgress)) {
+          unlocked.push(badge.id);
+          console.log(`🏅 Unlocked badge: ${badge.title}`);
+        }
+      }
+
+      user.badges = unlocked;
+      await user.save();
+
+      res.status(200).json({
+        message: 'Workout incremented',
+        progress: wp,
+        badges: unlocked });
 
   } catch (err) {
-    console.error('🔥 Increment Error:', err);
+    console.error('Increment Error:', err);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -91,7 +108,7 @@ router.post('/decrement', async (req, res) => {
       return res.status(400).json({ message: 'No progress to decrement' });
     }
 
-    // 🔻 All-time counts
+    // All-time counts
     const counts = { ...(wp.counts || {}) };
     const current = counts[category] || 0;
 
@@ -104,7 +121,7 @@ router.post('/decrement', async (req, res) => {
 
     wp.counts = counts;
 
-    // 🔻 Daily stats
+    // Daily stats
     const allStats = { ...(wp.dailyStats || {}) };
     const todayStats = { ...(allStats[today] || {}) };
 
@@ -118,7 +135,7 @@ router.post('/decrement', async (req, res) => {
       if (todayStats.total <= 0) {
         delete allStats[today];
 
-        // 🔻 Streak fix if this was today's only workout
+        // Streak fix if this was today's only workout
         if (wp.lastWorkoutDate === today) {
           wp.streakCount = Math.max(0, wp.streakCount - 1);
           wp.lastWorkoutDate = null;
@@ -138,7 +155,7 @@ router.post('/decrement', async (req, res) => {
     });
 
   } catch (err) {
-    console.error('🔥 Decrement Error:', err);
+    console.error('Decrement Error:', err);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -217,5 +234,26 @@ router.post('/reset', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
+// Get all badge statuses
+router.get('/badges/:userId', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId).select('workoutProgress badges');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const earned = user.badges || [];
+
+    const allBadges = badgeDefinitions.map((b) => ({
+      id: b.id,
+      title: b.title,
+      earned: earned.includes(b.id)
+    }));
+
+    res.json({ badges: allBadges });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 
 module.exports = router;
