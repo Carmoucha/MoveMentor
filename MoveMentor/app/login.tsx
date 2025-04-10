@@ -30,8 +30,8 @@ export default function LoginScreen() {
     try {
       setIsLoggingIn(true);
       
-      // Replace with your actual API URL
-      const response = await fetch('http://your-api-url/users/login', {
+      // Backend URL
+      const response = await fetch('http://localhost:8000/users/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
