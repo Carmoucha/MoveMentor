@@ -11,16 +11,14 @@ import {
   ActivityIndicator
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useAuth } from '../context/AuthContext';
-import { COLORS } from './styles/constants';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { COLORS } from '../styles/constants';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const [activeTab, setActiveTab] = useState('login');
   const router = useRouter();
-  const { signIn } = useAuth();
 
   const handleLogin = async () => {
     // Validate inputs
@@ -32,6 +30,7 @@ export default function LoginScreen() {
     try {
       setIsLoggingIn(true);
       
+      // Replace with your actual API URL
       const response = await fetch('http://your-api-url/users/login', {
         method: 'POST',
         headers: {
@@ -49,12 +48,12 @@ export default function LoginScreen() {
         throw new Error(data.message || 'Login failed');
       }
 
-      // Parse token to get userId
-      const tokenPayload = JSON.parse(atob(data.token.split('.')[1]));
-      const userId = tokenPayload.id;
+      // Store the JWT token and userId for future authenticated requests
+      await AsyncStorage.setItem('userToken', data.token);
+      await AsyncStorage.setItem('userId', data.userId);
       
-      // Use auth context to store credentials and manage state
-      await signIn(data.token, userId);
+      // For testing, you can use the test user credentials
+      console.log('Logged in successfully with userId:', data.userId);
       
       // Navigate to the main app
       router.replace('/dashboard');
@@ -81,16 +80,15 @@ export default function LoginScreen() {
       {/* Tab Selector */}
       <View style={styles.tabContainer}>
         <TouchableOpacity 
-          style={[styles.tabButton, activeTab === 'login' && styles.activeTab]} 
-          onPress={() => setActiveTab('login')}
+          style={[styles.tabButton, styles.activeTab]} 
         >
-          <Text style={[styles.tabText, activeTab === 'login' && styles.activeTabText]}>Log In</Text>
+          <Text style={[styles.tabText, styles.activeTabText]}>Log In</Text>
         </TouchableOpacity>
         <TouchableOpacity 
-          style={[styles.tabButton, activeTab === 'signup' && styles.activeTab]} 
+          style={[styles.tabButton]} 
           onPress={() => router.push('/signup')}
         >
-          <Text style={[styles.tabText, activeTab === 'signup' && styles.activeTabText]}>Sign Up</Text>
+          <Text style={[styles.tabText]}>Sign Up</Text>
         </TouchableOpacity>
       </View>
 
