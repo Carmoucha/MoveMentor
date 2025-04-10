@@ -11,17 +11,15 @@ import {
   ActivityIndicator
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useAuth } from '../context/AuthContext';
-import { COLORS } from './styles/constants';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { COLORS } from '../styles/constants';
 
 export default function SignupScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
-  const [activeTab, setActiveTab] = useState('signup');
   const router = useRouter();
-  const { register } = useAuth();
 
   const handleSignUp = async () => {
     // Validate inputs
@@ -52,7 +50,8 @@ export default function SignupScreen() {
     try {
       setIsRegistering(true);
       
-      const response = await fetch('http://your-api-url/users/register', {
+      // Backend URL
+      const response = await fetch('http://localhost:8000/users/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -69,8 +68,9 @@ export default function SignupScreen() {
         throw new Error(data.message || 'Registration failed');
       }
 
-      // Use auth context to store user ID
-      await register(data.userId);
+      // Store userId for future requests and onboarding
+      await AsyncStorage.setItem('userId', data.userId);
+      console.log('Registered successfully with userId:', data.userId);
       
       // Navigate to onboarding
       Alert.alert(
@@ -102,16 +102,15 @@ export default function SignupScreen() {
       {/* Tab Selector */}
       <View style={styles.tabContainer}>
         <TouchableOpacity 
-          style={[styles.tabButton, activeTab === 'login' && styles.activeTab]} 
+          style={[styles.tabButton]} 
           onPress={() => router.push('/login')}
         >
-          <Text style={[styles.tabText, activeTab === 'login' && styles.activeTabText]}>Log In</Text>
+          <Text style={[styles.tabText]}>Log In</Text>
         </TouchableOpacity>
         <TouchableOpacity 
-          style={[styles.tabButton, activeTab === 'signup' && styles.activeTab]} 
-          onPress={() => setActiveTab('signup')}
+          style={[styles.tabButton, styles.activeTab]} 
         >
-          <Text style={[styles.tabText, activeTab === 'signup' && styles.activeTabText]}>Sign Up</Text>
+          <Text style={[styles.tabText, styles.activeTabText]}>Sign Up</Text>
         </TouchableOpacity>
       </View>
 
