@@ -49,90 +49,89 @@ export default function WorkoutScreen() {
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [videos, setVideos] = useState<any[]>([]);
 
-  // for type selection
-  const toggleType = (type: string) => {
-    setSelectedTypes((prevTypes) =>
-      prevTypes.includes(type)
-        ? prevTypes.filter((t) => t !== type)
-        : [...prevTypes, type]
-    );
-  };
-
-  // Function to fetch video details, including duration
-  const fetchVideoDetails = async (videoId: string) => {
-    try {
-      const response = await axios.get('https://www.googleapis.com/youtube/v3/videos', {
-        params: {
-          part: 'contentDetails',
-          id: videoId,
-          key: API_KEY,
-          maxResults: 1,
-        },
-      });
-      const duration = response.data.items[0]?.contentDetails.duration;
-      return duration;
-    } catch (error) {
-      console.error("Error fetching video details:", error);
-      return null;
-    }
-  };
-
   // Function to fetch YouTube videos based on selected duration
   const fetchVideos = async (duration: string, type: string[]) => {
     let query = "workout";
     let videoDuration = "any"; // default to any
 
     if (duration === "15 min") {
-      query = "15 minute workout";
+      query = "15 minute";
       videoDuration = "short"; // Less than 4 minutes
     } else if (duration === "15-30 min") {
-      query = "15-30 minute workout";
+      query = "15-30 minute";
       videoDuration = "medium"; // 4-20 minutes
     } else if (duration === "30 min") {
-      query = "30 minute workout";
-      videoDuration = "medium"; // 4-20 minutes
+      query = "30 minute";
+      videoDuration = "long"; // 4-20 minutes
     } else if (duration === "30-45 min") {
-      query = "30-45 minute workout";
-      videoDuration = "medium"; // 4-20 minutes
+      query = "30-45 minute";
+      videoDuration = "long"; // 4-20 minutes
     } else if (duration === "45 min") {
-      query = "45 minute workout";
-      videoDuration = "medium"; // 4-20 minutes
+      query = "45 minute";
+      videoDuration = "long"; // 4-20 minutes
     } else if (duration === "45-60 min") {
-      query = "45-60 minute workout";
+      query = "45-60 minute";
       videoDuration = "long"; // More than 20 minutes
     } else if (duration === "1h30") {
-      query = "1.5 hour workout";
+      query = "1.5 hour";
       videoDuration = "long"; // More than 20 minutes
     } else if (duration === "2h") {
-      query = "2 hour workout";
+      query = "2 hour";
       videoDuration = "long"; // More than 20 minutes
     }
 
     try {
-      const response = await axios.get(`https://www.googleapis.com/youtube/v3/search`, {
-        params: {
-          part: 'snippet',
-          q: query,
-          type: 'video',
-          videoDuration: videoDuration,
-          key: API_KEY,
-        },
-      });
-      const videos = response.data.items;
 
-      // Now fetch the video details to get the duration for each video
-      const videosWithDuration = await Promise.all(videos.map(async (video: { id: { videoId: any; }; }) => {
-        const videoId = video.id.videoId;
-        const duration = await fetchVideoDetails(videoId); // Fetch duration
-        return {
-          ...video,
-          duration,
-        };
+      let allResults: any[] = [];
+      // If no type selected, just search with the duration
+      if (types.length === 0) {
+        const response = await axios.get(`https://www.googleapis.com/youtube/v3/search`, {
+          params: {
+            part: 'snippet',
+            q: query,
+            type: 'video',
+            videoDuration,
+            key: API_KEY,
+            maxResults: 5,
+          },
+        });
+        allResults = response.data.items;
+      } else {
+        // Loop through each type and send a separate request
+        for (const type of types) {
+          const fullQuery = `${type} ${query}`;
+          const response = await axios.get(`https://www.googleapis.com/youtube/v3/search`, {
+            params: {
+              part: 'snippet',
+              q: fullQuery,
+              type: 'video',
+              videoDuration,
+              key: API_KEY,
+              maxResults: 3,
+            },
+          });
+          allResults.push(...response.data.items);
+        }
+      }
+
+      // Optional: deduplicate based on videoId
+      const seen = new Set();
+      const uniqueVideos = allResults.filter((video) => {
+        const id = video.id.videoId;
+        if (seen.has(id)) return false;
+        seen.add(id);
+        return true;
+      });
+
+      // Stub in durations if needed later
+      const videosWithDuration = uniqueVideos.map((video) => ({
+        ...video,
+        duration: null,
       }));
 
-      setVideos(videosWithDuration); // Update state with video data and duration
+      setVideos(videosWithDuration);
     } catch (error) {
-      console.error("Error fetching YouTube videos:", error);
+      console.error("❌ Error fetching YouTube videos:", error);
     }
   };
 
@@ -142,16 +141,26 @@ export default function WorkoutScreen() {
     fetchVideos(selectedDuration!, selectedTypes);
   }, [selectedDuration, selectedTypes]);
 
-  // // for testing 
-  // const useMockData = true; // toggle this to false for real API data
-
-  // useEffect(() => {
-  //   if (useMockData) {
-  //     setVideos(generateMockVideos());
-  //   } else {
-  //     fetchVideos(selectedDuration!, selectedDuration ?? "15 min"); // set default to match the user's preferences
-  //   }
-  // }, [selectedDuration]);
+  async function login(email: string, password: string) {
+    const response = await fetch('/users/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email, password })
+    });
+  
+    const data = await response.json();
+  
+    if (response.ok) {
+      // Save the userId and token (e.g., in localStorage or a state management system like Redux)
+      localStorage.setItem('userId', data.userId);
+      localStorage.setItem('token', data.token);
+      console.log('Login successful', data);
+    } else {
+      console.log('Login failed', data.message);
+    }
+  }
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -197,7 +206,6 @@ export default function WorkoutScreen() {
 
         {/* Workout Types (multi-select) */}
         <Text style={styles.filtersSectionTitle}>Select Workout Types</Text>
-        <Text style={styles.filtersSectionTitle}>Select Workout Types</Text>
         <View style={styles.container}>
           <WorkoutTypePicker
             selectedWorkouts={selectedTypes}
@@ -230,10 +238,40 @@ function WorkoutCard({ video }: { readonly video: any }) {
   const duration = video.duration;
   const formattedDuration = duration ? formatDuration(duration) : 'No duration available';
 
+  // get userID from the login credentials 
+  const userId = localStorage.getItem('userId'); 
+
+
   // regardimg the counter
   const [completionCount, setCompletionCount] = useState(0);
-  const increment = () => setCompletionCount(prev => prev + 1);
-  const decrement = () => setCompletionCount(prev => Math.max(0, prev - 1));
+  
+  const increment = async () => {
+  try {
+    const res = await axios.post('https://localhost:8000/workouts/increment', {
+      userId,
+      type: "arms", // or map video titles to types dynamically
+    });
+
+    console.log("✅ Incremented:", res.data);
+    setCompletionCount((prev) => prev + 1);
+  } catch (error) {
+    console.error("❌ Error incrementing workout:", error);
+  }
+};
+
+const decrement = async () => {
+  try {
+    const res = await axios.post('https://localhost:8000/workouts/decrement', {
+      userId,
+      type: "arms", // or map video titles to types dynamically
+    });
+
+    console.log("✅ Decremented:", res.data);
+    setCompletionCount((prev) => Math.max(0, prev - 1));
+  } catch (error) {
+    console.error("❌ Error decrementing workout:", error);
+  }
+};
 
 
   return (
@@ -292,23 +330,6 @@ function formatDuration(isoDuration: string): string {
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   }
 }
-
-// // For testing purposes
-// const generateMockVideos = (count = 100) => {
-//   return Array.from({ length: count }, (_, i) => ({
-//     id: { videoId: `mock-id-${i + 1}` },
-//     snippet: {
-//       title: `Mock Workout Video #${i + 1}`,
-//       thumbnails: {
-//         high: {
-//           url: 'https://via.placeholder.com/150', // Placeholder image
-//         },
-//       },
-//     },
-//     duration: `${10 + (i % 20)}:0${i % 10}` // Simulated MM:SS
-//   }));
-// };
-
 
 const screenWidth = Dimensions.get('window').width;
 

@@ -67,13 +67,13 @@ const WorkoutTypePicker: React.FC<WorkoutTypePickerProps> = ({
     <View style={{ zIndex: 1000, marginBottom: open ? 160 : 30 }}>
       <DropDownPicker
         multiple
-        min={0} // Allow selecting at least 0 options
-        max={5} // You can set a maximum number of options to select
+        min={0}
+        max={5} 
         open={open}
-        value={selectedWorkouts} // Multi-select will return an array
+        value={selectedWorkouts} 
         items={items}
         setOpen={setOpen}
-        setValue={setSelectedWorkouts} // Update parent state with selected values
+        setValue={setSelectedWorkouts} // update array
         placeholder="Select workout types"
         style={{
           borderColor: borderColor,
