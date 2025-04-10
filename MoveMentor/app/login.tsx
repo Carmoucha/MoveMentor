@@ -11,22 +11,23 @@ import {
   ActivityIndicator
 } from 'react-native';
 import { useRouter } from 'expo-router';
+//import { useAuth } from '../context/AuthContext';
+import { COLORS } from './styles/constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { COLORS } from '../styles/constants';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const router = useRouter();
+  //const { signIn } = useAuth();
 
   const handleLogin = async () => {
-    // Validate inputs
     if (!email || !password) {
       Alert.alert('Missing Information', 'Please enter both email and password');
       return;
     }
-
+  
     try {
       setIsLoggingIn(true);
       
@@ -36,26 +37,18 @@ export default function LoginScreen() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
+        body: JSON.stringify({ email, password }),
       });
-
+  
       const data = await response.json();
-
+  
       if (!response.ok) {
         throw new Error(data.message || 'Login failed');
       }
-
-      // Store the JWT token and userId for future authenticated requests
-      await AsyncStorage.setItem('userToken', data.token);
+  
+      // Store userId only, no token stuff
       await AsyncStorage.setItem('userId', data.userId);
-      
-      // For testing, you can use the test user credentials
-      console.log('Logged in successfully with userId:', data.userId);
-      
-      // Navigate to the main app
+  
       router.replace('/dashboard');
     } catch (error) {
       console.error('Login error:', error);
@@ -64,6 +57,7 @@ export default function LoginScreen() {
       setIsLoggingIn(false);
     }
   };
+  
 
   return (
     <SafeAreaView style={styles.container}>
@@ -85,11 +79,15 @@ export default function LoginScreen() {
           <Text style={[styles.tabText, styles.activeTabText]}>Log In</Text>
         </TouchableOpacity>
         <TouchableOpacity 
-          style={[styles.tabButton]} 
-          onPress={() => router.push('/signup')}
-        >
-          <Text style={[styles.tabText]}>Sign Up</Text>
-        </TouchableOpacity>
+        style={[styles.tabButton, activeTab === 'signup' && styles.activeTab]} 
+        onPress={() => {
+          setActiveTab('signup');
+          router.push('/signup');
+        }}
+>
+  <Text style={[styles.tabText, activeTab === 'signup' && styles.activeTabText]}>Sign Up</Text>
+</TouchableOpacity>
+
       </View>
 
       {/* Input Fields */}

@@ -1,64 +1,42 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
+import { Stack } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'expo-status-bar';
 import { View, Text } from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { COLORS } from '../styles/constants';
-import styles from '../styles/navigationBarStyles';
+import { useFonts } from 'expo-font';
+import { useEffect } from 'react';
 
-interface TabBarIconProps {
-  route: any;
-  focused: boolean;
-}
+SplashScreen.preventAutoHideAsync();
 
-const TabBarIcon: React.FC<TabBarIconProps> = ({ route, focused }) => {
-  let iconName = '';
-  let label = '';
+export default function RootLayout() {
+  const [loaded] = useFonts({
+    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+  });
 
-  switch (route.name) {
-    case 'dashboard':
-      iconName = 'home';
-      label = 'Home';
-      break;
-    case 'progress':
-      iconName = 'trophy';
-      label = 'Progress';
-      break;
-    case 'workout':
-      iconName = 'barbell';
-      label = 'Workout';
-      break;
+  useEffect(() => {
+    if (loaded) {
+      SplashScreen.hideAsync();
+    }
+  }, [loaded]);
+
+  if (!loaded) {
+    console.log('Fonts not loaded yet');
+    return <Text>Loading...</Text>;
   }
 
   return (
-    <View style={styles.tabItem}>
-      {focused && <View style={styles.activeTab} />} 
-      <Ionicons
-        name={iconName as keyof typeof Ionicons.glyphMap}
-        size={30}
-        color={focused ? COLORS.primaryGreen : COLORS.focusedGray}
-        style={{ marginBottom: -20, alignSelf: 'center' }}
-      />
-      <Text style={[styles.tabLabel, { color: focused ? COLORS.primaryGreen : COLORS.focusedGray }]}>
-        {label}
-      </Text>
-    </View>
-  );
-};
+    <View style={{ flex: 1 }}>
+      <Stack screenOptions={{ headerShown: false }}>
+        {/* Auth Screens */}
+        <Stack.Screen name="login" />
+        <Stack.Screen name="signup" />
+        <Stack.Screen name="onboarding" />
 
-export default function TabLayout() {
-  return (
-    <Tabs
-      screenOptions={({ route }) => ({
-        headerShown: false,
-        tabBarStyle: styles.tabBarStyle,
-        tabBarItemStyle: styles.tabBarItemStyle,
-        tabBarShowLabel: false,
-        tabBarIcon: ({ focused }) => <TabBarIcon route={route} focused={focused} />,
-      })}
-    >
-      <Tabs.Screen name="dashboard" />
-      <Tabs.Screen name="progress" />
-      <Tabs.Screen name="workout" />
-    </Tabs>
+        {/* Main App */}
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="index" />
+        <Stack.Screen name="+not-found" />
+      </Stack>
+      <StatusBar style="auto" />
+    </View>
   );
 }
