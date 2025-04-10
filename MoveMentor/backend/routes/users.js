@@ -6,7 +6,7 @@ require('dotenv').config();
 const SECRET = process.env.JWT_SECRET;
 const User = require('../models/User'); // use real model
 
-// REGISTER (MongoDB version)
+// REGISTER 
 router.post('/register', async (req, res) => {
   const { email, password } = req.body;
 
@@ -26,7 +26,7 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// LOGIN (MongoDB version)
+// LOGIN 
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -40,6 +40,39 @@ router.post('/login', async (req, res) => {
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ message: 'Something went wrong' });
+  }
+  
+});
+// Save onboarding answers
+router.post('/onboarding', async (req, res) => {
+  const { userId, onboarding } = req.body;
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    user.onboarding = onboarding;
+    await user.save();
+
+    res.status(200).json({ message: 'Onboarding saved successfully' });
+  } catch (err) {
+    console.error('Error saving onboarding:', err);
+    res.status(500).json({ message: 'Failed to save onboarding data' });
+  }
+});
+
+// Get onboarding answers for a user
+router.get('/onboarding/:userId', async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const user = await User.findById(userId).select('onboarding');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    res.status(200).json({ onboarding: user.onboarding });
+  } catch (err) {
+    console.error('Error fetching onboarding data:', err);
+    res.status(500).json({ message: 'Failed to fetch onboarding data' });
   }
 });
 
