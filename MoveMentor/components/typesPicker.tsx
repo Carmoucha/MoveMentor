@@ -68,13 +68,14 @@ const WorkoutTypePicker: React.FC<WorkoutTypePickerProps> = ({
       <DropDownPicker
         multiple
         min={0}
-        max={5} 
+        max={5}
         open={open}
-        value={selectedWorkouts} 
+        value={selectedWorkouts}
         items={items}
         setOpen={setOpen}
         setValue={setSelectedWorkouts} // update array
         placeholder="Select workout types"
+        listMode="MODAL"
         style={{
           borderColor: borderColor,
           backgroundColor: backgroundColor,
