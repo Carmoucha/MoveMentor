@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, TextInput, ScrollView, StyleSheet } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getBaseUrl } from '../backend/utils/api'; // ← adjust path as needed
 import { API_BASE } from '../constants/IP';
 
 const commonLimitations = [
