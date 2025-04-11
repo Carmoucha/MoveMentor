@@ -1,5 +1,8 @@
 // app.config.js
-import 'dotenv/config'; // Load environment variables from .env file
+import dotenv from 'dotenv';
+import path from 'path';
+
+dotenv.config({ path: path.resolve(__dirname, './backend/.env') }); // Load environment variables from .env file
 
 export default {
   expo: {
