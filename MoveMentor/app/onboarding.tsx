@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
+import { API_BASE } from '../constants/IP';
 
 const fitnessGoals = ['Lose Weight', 'Build Muscles', 'Improve Flexibility', 'Improve Cardio'];
 const workoutPreferences = ['Home Workouts', 'Gym', 'Both'];

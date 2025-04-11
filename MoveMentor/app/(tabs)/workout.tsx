@@ -8,6 +8,7 @@ import { COLORS, constStyles } from '../styles/constants';
 import Constants from "expo-constants";
 import WorkoutTypePicker from '../../components/typesPicker';
 import styles from '../styles/workoutPageStyles';
+import { API_BASE } from '../../constants/IP';
 
 
 const API_KEY = Constants.expoConfig?.extra?.apiKey;
@@ -230,7 +231,7 @@ function WorkoutCard({ video }: { readonly video: any }) {
 
   const increment = async () => {
     try {
-      const res = await axios.post('http://10.0.0.32:8000/workouts/increment', {
+      const res = await axios.post(`${API_BASE}/workouts/increment`,  {
         userId,
         type: video.workoutType, // or map video titles to types dynamically
       });
@@ -244,7 +245,7 @@ function WorkoutCard({ video }: { readonly video: any }) {
 
   const decrement = async () => {
     try {
-      const res = await axios.post('http://10.0.0.32:8000/workouts/decrement', {
+      const res = await axios.post(`${API_BASE}/workouts/decrement`, {
         userId: userId,
         type: video.workoutType, // or map video titles to types dynamically
       });

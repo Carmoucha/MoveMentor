@@ -5,6 +5,7 @@ import { View, Text } from 'react-native';
 import { useFonts } from 'expo-font';
 import { useEffect } from 'react';
 
+
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
