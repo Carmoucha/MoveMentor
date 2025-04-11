@@ -37,7 +37,7 @@ export default function SignupScreen() {
     try {
       setIsRegistering(true);
   
-      const response = await fetch('http://localhost:8000/users/register', {
+      const response = await fetch('http://10.0.0.32:8000/users/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

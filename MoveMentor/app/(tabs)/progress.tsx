@@ -40,7 +40,7 @@ export default function ProgressScreen() {
   
         setUserId(storedId);
   
-        const res = await axios.get(`http://localhost:8000/workouts/${storedId}`);
+        const res = await axios.get(`http://10.0.0.32:8000/workouts/${storedId}`);
         const data = res.data;
         console.log('Progress data:', data);
   

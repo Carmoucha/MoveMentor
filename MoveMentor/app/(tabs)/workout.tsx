@@ -92,9 +92,36 @@ export default function WorkoutScreen() {
         const videoTitle = video.snippet.title.toLowerCase();
 
         // Find first selected type that appears in the title
-        const matchedType = types.find((type) =>
-          videoTitle.includes(type.toLowerCase())
-        ) || "Other";
+        const validTypes = [
+          "arms",
+          "chest",
+          "legs",
+          "glutes",
+          "abs",
+          "hiit",
+          "fat_burn",
+          "endurance",
+          "functional_training",
+          "stretching",
+          "balance",
+          "yoga",
+          "pilates",
+          "back",
+          "full_body"
+        ];
+
+
+        // Fallback to null if it's not in the valid list
+        let matchedType = types.find((type) => {
+          const normalizedType = type.toLowerCase().replace(/_/g, ' ');
+          return videoTitle.includes(normalizedType);
+        });
+
+        if (!matchedType || !validTypes.includes(matchedType)) {
+          return null;
+        }
+
+
 
         return {
           ...video,
@@ -201,9 +228,11 @@ export default function WorkoutScreen() {
 
         {/* Display the video results */}
         <ScrollView contentContainerStyle={styles.videoContainer}>
-          {videos.map((video: any) => (
-            <WorkoutCard key={video.id.videoId} video={video} />
-          ))}
+          {videos
+            .filter((video: any) => video?.workoutType !== undefined)
+            .map((video: any) => (
+              <WorkoutCard key={video.id.videoId} video={video} />
+            ))}
         </ScrollView>
       </ScrollView>
     </SafeAreaView>
@@ -230,6 +259,8 @@ function WorkoutCard({ video }: { readonly video: any }) {
 
   const increment = async () => {
     try {
+      console.log("📦 Workout type to increment:", video.workoutType);
+
       const res = await axios.post('http://10.0.0.32:8000/workouts/increment', {
         userId,
         type: video.workoutType, // or map video titles to types dynamically
@@ -252,6 +283,7 @@ function WorkoutCard({ video }: { readonly video: any }) {
       console.log("✅ Decremented:", res.data);
       setCompletionCount((prev) => Math.max(0, prev - 1));
     } catch (error) {
+      console.log('Payload:', { userId, type: video.workoutType });
       console.error("❌ Error decrementing workout:", error);
     }
   };

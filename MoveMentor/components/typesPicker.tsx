@@ -104,7 +104,6 @@ const WorkoutTypePicker: React.FC<WorkoutTypePickerProps> = ({
 WorkoutTypePicker.propTypes = {
   selectedWorkouts: PropTypes.array.isRequired,
   setSelectedWorkouts: PropTypes.func.isRequired,
-  isDarkMode: PropTypes.bool,
 };
 
 export default WorkoutTypePicker;

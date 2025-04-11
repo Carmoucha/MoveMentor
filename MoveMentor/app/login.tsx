@@ -33,7 +33,7 @@ export default function LoginScreen() {
       setIsLoggingIn(true);
       
       // Backend URL
-      const response = await fetch('http://localhost:8000/users/login', {
+      const response = await fetch('http://10.0.0.32:8000/users/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
