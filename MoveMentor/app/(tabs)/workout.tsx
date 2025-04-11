@@ -89,58 +89,57 @@ export default function WorkoutScreen() {
         durationMapById[item.id] = item.contentDetails.duration;
       });
 
-      const videosWithDuration = searchResults.map((video: any) => {
+      const videosWithDuration = searchResults
+      .map((video: any) => {
         const videoTitle = video.snippet.title.toLowerCase();
-
-        // Find first selected type that appears in the title
+    
         const validTypes = [
-          "arms",
-          "chest",
-          "legs",
-          "glutes",
-          "abs",
-          "hiit",
-          "fat_burn",
-          "endurance",
-          "functional_training",
-          "stretching",
-          "balance",
-          "yoga",
-          "pilates",
-          "back",
-          "full_body"
+          "arms", "chest", "legs", "glutes", "abs", "hiit", "fat_burn",
+          "endurance", "functional_training", "stretching", "balance",
+          "yoga", "pilates", "back", "full_body"
         ];
-
-
-        // Fallback to null if it's not in the valid list
-        let matchedType = types.find((type) => {
+    
+        let matchedTypes = types.filter((type) => {
           const normalizedType = type.toLowerCase().replace(/_/g, ' ');
           return videoTitle.includes(normalizedType);
         });
-
-        if (!matchedType || !validTypes.includes(matchedType)) {
+    
+        const validMatches = matchedTypes.filter((t) => validTypes.includes(t));
+        if (validMatches.length === 0) {
           return null;
         }
-
-
-
+        
+    
         return {
           ...video,
           duration: durationMapById[video.id.videoId] || null,
-          workoutType: matchedType, // ✅ include the matched type
+          workoutType: validMatches,
         };
-      });
+      })
+      .filter((video: any) => video !== null); // ✅ remove nulls
+    
+    // ✅ Set filtered videos first
+    const videosPerType: Record<string, any[]> = {};
 
-      const seen = new Set();
-      const uniqueVideos = videosWithDuration.filter((video: any) => {
-        const id = video.id.videoId;
-        if (seen.has(id)) return false;
-        seen.add(id);
-        return true;
-      });
-
-      setVideos(uniqueVideos);
-      videoCache.current[cacheKey] = uniqueVideos;
+    videosWithDuration.forEach((video: any) => {
+      const type = video.workoutType;
+      if (!type) return;
+    
+      if (!videosPerType[type]) {
+        videosPerType[type] = [];
+      }
+    
+      if (videosPerType[type].length < 2) {
+        videosPerType[type].push(video);
+      }
+    });
+    
+    // Flatten the groups into a single array
+    const limitedVideos = Object.values(videosPerType).flat();
+    
+    // Store and cache
+    setVideos(limitedVideos);
+    videoCache.current[cacheKey] = limitedVideos;    
     } catch (error) {
       console.error("❌ Error fetching YouTube videos:", error);
     }
@@ -230,11 +229,14 @@ export default function WorkoutScreen() {
         {/* Display the video results */}
         <ScrollView contentContainerStyle={styles.videoContainer}>
           {videos
-            .filter((video: any) => video?.workoutType !== undefined)
+            .filter((video: any) => video && video.workoutType) // ensures video is not undefined/null and has a workoutType
+            
             .map((video: any) => (
-              <WorkoutCard key={video.id.videoId} video={video} />
+              <WorkoutCard key={video?.id?.videoId || video?.id} video={video} />
             ))}
         </ScrollView>
+
+
       </ScrollView>
     </SafeAreaView>
   );
@@ -258,11 +260,14 @@ function WorkoutCard({ video }: { readonly video: any }) {
   // regardimg the counter
   const [completionCount, setCompletionCount] = useState(0);
 
+  console.log("video", video);
+
+
   const increment = async () => {
     try {
       console.log("📦 Workout type to increment:", video.workoutType);
 
-      const res = await axios.post(`${API_BASE}/workouts/increment`,  {
+      const res = await axios.post(`${API_BASE}/workouts/increment`, {
         userId,
         type: video.workoutType, // or map video titles to types dynamically
       });
