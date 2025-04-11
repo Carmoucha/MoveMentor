@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, TextInput, ScrollView, StyleSheet } from 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getBaseUrl } from '../backend/utils/api'; // ← adjust path as needed
+import { API_BASE } from '../constants/IP';
 
 const commonLimitations = [
   'Knee pain',
@@ -48,8 +49,8 @@ export default function LimitationsScreen() {
     };
   
     try {
-      const baseUrl = await getBaseUrl(); // 👈 added this
-      const response = await fetch(`${baseUrl}/users/onboarding`, {
+  
+      const response = await fetch(`${API_BASE}/users/onboarding`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, onboarding: onboardingData }),
@@ -59,19 +60,19 @@ export default function LimitationsScreen() {
       try {
         result = await response.json();
       } catch (e) {
-        console.error('❌ Failed to parse JSON:', e);
+        console.error('Failed to parse JSON:', e);
         throw new Error('Invalid server response (not JSON)');
       }
 
       if (response.ok) {
-        console.log('✅ Onboarding saved to backend:', result);
+        console.log('Onboarding saved to backend:', result);
         router.push('/dashboard');
       } else {
-        console.warn('⚠️ Server responded with error:', result.message);
+        console.warn('Server responded with error:', result.message);
       }
 
     } catch (err) {
-      console.error('❌ Error submitting onboarding:', err);
+      console.error('Error submitting onboarding:', err);
     }
   };
   
