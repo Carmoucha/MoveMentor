@@ -38,6 +38,7 @@ export default function SignupScreen() {
     try {
       setIsRegistering(true);
   
+
       const response = await fetch(`${API_BASE}/users/register`, {
         method: 'POST',
         headers: {

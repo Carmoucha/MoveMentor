@@ -3,7 +3,9 @@ import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'rea
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
+import { COLORS,  constStyles } from '../styles/constants';
 import { API_BASE } from '../../constants/IP';
+
 
 export default function Dashboard() {
   const router = useRouter();
@@ -59,7 +61,7 @@ export default function Dashboard() {
         </TouchableOpacity>
       </View>
 
-      <Text style={styles.title}>Welcome Athlete!</Text>
+      <Text style={constStyles.title}>Welcome Athlete!</Text>
 
       <View style={{ width: '100%' }}>
         <Text style={styles.subtitle}>Preferences</Text>
@@ -103,8 +105,9 @@ export default function Dashboard() {
         <Text style={styles.buttonText}>▶ Start Workout</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.linkButton} onPress={() => router.push('/(tabs)/progress')}>
-        <Text style={styles.linkButtonText}>📈 View Progress</Text>
+      <TouchableOpacity style={styles.button} onPress={() => router.push('/(tabs)/progress')}>
+      <Ionicons name="stats-chart-outline" size={24} color="white"/>
+        <Text style={styles.linkButtonText}>View Progress</Text>
       </TouchableOpacity>
     </View>
   );
@@ -119,10 +122,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  title: { fontSize: 24, fontWeight: '600', marginBottom: 6, textAlign: 'center' },
   subtitle: { fontSize: 18, fontWeight: '500', marginBottom: 12 },
   summaryBox: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: COLORS.primaryGreen,
     borderRadius: 16,
     padding: 20,
     marginBottom: 30,
@@ -149,7 +151,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   button: {
-    backgroundColor: '#00c170',
+    backgroundColor: COLORS.primaryGreen,
     paddingVertical: 14,
     borderRadius: 24,
     alignItems: 'center',
@@ -166,8 +168,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   linkButtonText: {
-    color: '#4CAF50',
+    color: 'white',
     fontSize: 16,
-    textDecorationLine: 'underline',
-  },
+    },
 });

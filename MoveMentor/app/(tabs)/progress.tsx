@@ -41,6 +41,7 @@ export default function ProgressScreen() {
   
         setUserId(storedId);
   
+
         const res = await axios.get(`${API_BASE}/workouts/${storedId}`);
         const data = res.data;
         console.log('Progress data:', data);
