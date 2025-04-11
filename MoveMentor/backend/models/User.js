@@ -1,12 +1,28 @@
 const mongoose = require('mongoose');
 
 const onboardingSchema = new mongoose.Schema({
-  fitnessGoals: [String], // e.g. ["Build Muscles", "Improve Cardio"]
-  workoutPreferences: { type: String }, // e.g. "Home Workouts", "Gym", or "Both"
-  experienceLevel: { type: String }, // "Beginner", "Intermediate", or "Advanced"
-  limitations: [String], // e.g. ["Limited Space", "Quiet Workouts"]
-  otherLimitations: { type: String } // text from "Other" field (optional)
+  fitnessGoals: {
+    type: [String],
+    required: true
+  },
+  workoutPreferences: {
+    type: [String],
+    required: true
+  },
+  experienceLevel: {
+    type: String,
+    required: true
+  },
+  limitations: {
+    type: [String],
+    required: true
+  },
+  otherLimitations: {
+    type: String,
+    default: ''
+  }
 }, { _id: false });
+
 
 const workoutProgressSchema = new mongoose.Schema({
   counts: {

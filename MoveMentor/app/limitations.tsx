@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, TextInput, ScrollView, StyleSheet } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import API_BASE_URL from '../backend/utils/api'; // ← adjust path as needed
+import { getBaseUrl } from '../backend/utils/api'; // ← adjust path as needed
 
 const commonLimitations = [
   'Knee pain',
@@ -28,17 +28,17 @@ export default function LimitationsScreen() {
 
   const handleFinish = async () => {
     console.log('📩 Submitting onboarding data...');
-
+  
     const userId = await AsyncStorage.getItem('userId');
     if (!userId) {
       console.warn('❌ No userId found in AsyncStorage');
       return;
     }
-
+  
     const allLimitations = customLimitation
       ? [...selectedLimitations, customLimitation]
       : selectedLimitations;
-
+  
     const onboardingData = {
       fitnessGoals: JSON.parse(goals as string),
       workoutPreferences: JSON.parse(preferences as string),
@@ -46,26 +46,35 @@ export default function LimitationsScreen() {
       limitations: allLimitations,
       otherLimitations: customLimitation,
     };
-
+  
     try {
-      const response = await fetch(`${API_BASE_URL}/users/onboarding`, {
+      const baseUrl = await getBaseUrl(); // 👈 added this
+      const response = await fetch(`${baseUrl}/users/onboarding`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, onboarding: onboardingData }),
       });
-
-      const result = await response.json();
-      console.log('✅ Onboarding saved to backend:', result);
+  
+      let result;
+      try {
+        result = await response.json();
+      } catch (e) {
+        console.error('❌ Failed to parse JSON:', e);
+        throw new Error('Invalid server response (not JSON)');
+      }
 
       if (response.ok) {
+        console.log('✅ Onboarding saved to backend:', result);
         router.push('/dashboard');
       } else {
         console.warn('⚠️ Server responded with error:', result.message);
       }
+
     } catch (err) {
       console.error('❌ Error submitting onboarding:', err);
     }
   };
+  
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
