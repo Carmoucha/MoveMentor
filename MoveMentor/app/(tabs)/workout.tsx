@@ -9,7 +9,8 @@ import Constants from "expo-constants";
 import WorkoutTypePicker from '../../components/typesPicker';
 import styles from '../styles/workoutPageStyles';
 import { API_BASE } from '../../constants/IP';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { eventEmitter } from '../../utils/event';
 
 const API_KEY = Constants.expoConfig?.extra?.apiKey;
 
@@ -254,7 +255,14 @@ function WorkoutCard({ video }: { readonly video: any }) {
   const formattedDuration = duration ? formatDuration(duration) : 'No duration available';
 
   // get userID from the login credentials 
-  const userId = "67f7400c2863d812b1be7db1";
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    AsyncStorage.getItem('userId').then((storedId) => {
+      setUserId(storedId);
+    });
+  }, []);
+  
 
 
   // regardimg the counter
@@ -262,37 +270,63 @@ function WorkoutCard({ video }: { readonly video: any }) {
 
   console.log("video", video);
 
+  const fetchUserIdAndProgress = async () => {
+    const storedId = await AsyncStorage.getItem('userId');
+    if (!storedId) return;
+  
+    try {
+      await axios.get(`${API_BASE}/workouts/${storedId}`);
+    } catch (err) {
+      console.error('Error fetching workout progress:', err);
+    }
+  };
+
+  const fetchBadges = async () => {
+    const userId = await AsyncStorage.getItem('userId');
+    if (!userId) return;
+  
+    try {
+      await axios.get(`${API_BASE}/workouts/badges/${userId}`);
+    } catch (error) {
+      console.error("❌ Error fetching badges:", error);
+    }
+  };
+
 
   const increment = async () => {
+    if (!userId) {
+      console.error("User ID not found.");
+      return;
+    }
+  
     try {
-      console.log("📦 Workout type to increment:", video.workoutType);
-
-      const res = await axios.post(`${API_BASE}/workouts/increment`, {
-        userId,
-        type: video.workoutType, // or map video titles to types dynamically
-      });
-
+      const typeToSend = video.workoutType[0];
+      const res = await axios.post(`${API_BASE}/workouts/increment`, { userId, type: typeToSend });
+  
       console.log("✅ Incremented:", res.data);
       setCompletionCount((prev) => prev + 1);
+      eventEmitter.emit('workoutProgressUpdated');
     } catch (error) {
       console.error("❌ Error incrementing workout:", error);
     }
   };
+  
 
   const decrement = async () => {
     try {
-      const res = await axios.post(`${API_BASE}/workouts/decrement`, {
-        userId: userId,
-        type: video.workoutType, // or map video titles to types dynamically
-      });
-
+      const typeToSend = video.workoutType[0];
+      const res = await axios.post(`${API_BASE}/workouts/decrement`, { userId, type: typeToSend });
+  
       console.log("✅ Decremented:", res.data);
       setCompletionCount((prev) => Math.max(0, prev - 1));
+  
+      // ✅ Emit update so other screens refresh
+      eventEmitter.emit('workoutProgressUpdated');
     } catch (error) {
-      console.log('Payload:', { userId, type: video.workoutType });
       console.error("❌ Error decrementing workout:", error);
     }
   };
+  
 
 
   return (
