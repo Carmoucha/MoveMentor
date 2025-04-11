@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { View, Text, TouchableOpacity, StyleSheet, Pressable, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS, constStyles } from '../styles/constants';
+import { API_BASE } from '../../constants/IP';
 
 import { useEffect } from 'react';
 import axios from 'axios';
@@ -40,7 +41,8 @@ export default function ProgressScreen() {
   
         setUserId(storedId);
   
-        const res = await axios.get(`http://10.0.0.32:8000/workouts/${storedId}`);
+
+        const res = await axios.get(`${API_BASE}/workouts/${storedId}`);
         const data = res.data;
         console.log('Progress data:', data);
   

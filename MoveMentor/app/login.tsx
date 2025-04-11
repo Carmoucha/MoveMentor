@@ -14,6 +14,8 @@ import { useRouter } from 'expo-router';
 //import { useAuth } from '../context/AuthContext';
 import { COLORS } from './styles/constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_BASE } from '../constants/IP';
+
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -33,7 +35,9 @@ export default function LoginScreen() {
       setIsLoggingIn(true);
       
       // Backend URL
-      const response = await fetch('http://10.0.0.32:8000/users/login', {
+
+
+      const response = await fetch(`${API_BASE}/users/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -51,7 +55,7 @@ export default function LoginScreen() {
       await AsyncStorage.setItem('userId', data.userId);
   
       router.replace('/dashboard');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login error:', error);
       Alert.alert('Login Failed', error.message || 'Please check your credentials and try again');
     } finally {

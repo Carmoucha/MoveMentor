@@ -14,6 +14,7 @@ import { useRouter } from 'expo-router';
 //import { useAuth } from '../context/AuthContext';
 import { COLORS } from './styles/constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_BASE } from '../constants/IP';
 
 export default function SignupScreen() {
   const [email, setEmail] = useState('');
@@ -37,7 +38,8 @@ export default function SignupScreen() {
     try {
       setIsRegistering(true);
   
-      const response = await fetch('http://10.0.0.32:8000/users/register', {
+
+      const response = await fetch(`${API_BASE}/users/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -57,7 +59,7 @@ export default function SignupScreen() {
       router.push('/onboarding');
 
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Signup error:', error);
       Alert.alert('Signup Failed', error.message || 'Try a different email.');
     } finally {

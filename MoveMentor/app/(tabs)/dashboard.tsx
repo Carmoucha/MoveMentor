@@ -3,8 +3,9 @@ import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'rea
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
-import { getBaseUrl } from '../../backend/utils/api';
 import { COLORS,  constStyles } from '../styles/constants';
+import { API_BASE } from '../../constants/IP';
+
 
 export default function Dashboard() {
   const router = useRouter();
@@ -23,8 +24,8 @@ export default function Dashboard() {
         const userId = await AsyncStorage.getItem('userId');
         if (!userId) return console.warn('No user ID found');
 
-        const baseUrl = await getBaseUrl();
-        const res = await fetch(`${baseUrl}/users/onboarding/${userId}`);
+    
+        const res = await fetch(`${API_BASE}/users/onboarding/${userId}`);
         const data = await res.json();
 
         if (data.onboarding) {
