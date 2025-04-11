@@ -10,62 +10,65 @@ import { API_BASE } from '../../constants/IP';
 import { useEffect } from 'react';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
+import { eventEmitter } from '../../utils/event';
+
 
 
 export default function ProgressScreen() {
   const router = useRouter();
 
-  const [weeklyProgress, setWeeklyProgress] = useState([
-    true, true, true, true, true, false, false,
-  ]);
-
+  const [weeklyProgress, setWeeklyProgress] = useState([true, true, true, true, true, false, false]);
   const [muscleProgress, setMuscleProgress] = useState(0);
   const [otherProgress, setOtherProgress] = useState(0);
   const [streak, setStreak] = useState(0);
-
-  // Static goals are fine unless you’re making them dynamic too
   const muscleGoal = 10;
   const otherGoal = 20;
-
   const [userId, setUserId] = useState<string | null>(null);
 
-
-  useEffect(() => {
-    const fetchUserIdAndProgress = async () => {
-      try {
-        const storedId = await AsyncStorage.getItem('userId');
-        if (!storedId) {
-          console.warn('No user ID found in storage');
-          return;
-        }
-  
-        setUserId(storedId);
-  
-
-        const res = await axios.get(`${API_BASE}/workouts/${storedId}`);
-        const data = res.data;
-        console.log('Progress data:', data);
-  
-        const mainGoal = data.goals[0] || 'Main';
-  
-        setMuscleProgress(data.groupedCounts[mainGoal] || 0);
-        setOtherProgress(data.groupedCounts['Other'] || 0);
-        setStreak(data.streakCount || 0);
-      } catch (err) {
-        console.error('Error fetching workout progress:', err);
+  // MOVE THIS FUNCTION HERE, OUTSIDE useFocusEffect
+  const fetchUserIdAndProgress = async () => {
+    try {
+      const storedId = await AsyncStorage.getItem('userId');
+      if (!storedId) {
+        console.warn('No user ID found in storage');
+        return;
       }
+
+      setUserId(storedId);
+      const res = await axios.get(`${API_BASE}/workouts/${storedId}`);
+      const data = res.data;
+
+      const mainGoal = data.goals[0] || 'Main';
+      setMuscleProgress(data.groupedCounts[mainGoal] || 0);
+      setOtherProgress(data.groupedCounts['Other'] || 0);
+      setStreak(data.streakCount || 0);
+    } catch (err) {
+      console.error('Error fetching workout progress:', err);
+    }
+  };
+
+  // Call it automatically when screen focuses
+  useEffect(() => {
+    const listener = () => {
+      fetchUserIdAndProgress();
     };
   
+    // Fetch progress immediately on initial mount
     fetchUserIdAndProgress();
+  
+    // Also fetch whenever event fires
+    eventEmitter.on('workoutProgressUpdated', listener);
+  
+    return () => {
+      eventEmitter.off('workoutProgressUpdated', listener);
+    };
   }, []);
   
   
-  
-
-
   const musclePercentage = (muscleProgress / muscleGoal) * 100;
   const otherPercentage = (otherProgress / otherGoal) * 100;
-
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}

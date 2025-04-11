@@ -7,6 +7,7 @@ import axios from 'axios';
 import { API_BASE } from '../constants/IP';
 import { COLORS } from './styles/constants';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { eventEmitter } from '../utils/event';
 
 interface Badge {
   id: string;
@@ -20,9 +21,22 @@ export default function BadgesScreen() {
   const [earnedCount, setEarnedCount] = useState(0);
 
   useEffect(() => {
-    fetchBadges();
+    const listener = () => {
+      fetchBadges();
+    };
+  
+    // Fetch badges immediately on initial mount
+    fetchBadges(); 
+  
+    // Also fetch badges whenever the event fires
+    eventEmitter.on('workoutProgressUpdated', listener);
+  
+    return () => {
+      eventEmitter.off('workoutProgressUpdated', listener);
+    };
   }, []);
-
+  
+  
   const fetchBadges = async () => {
     const userId = await AsyncStorage.getItem('userId');
     if (!userId) return;
