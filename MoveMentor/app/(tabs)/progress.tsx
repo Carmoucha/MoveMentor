@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
-import { View, Text, TouchableOpacity, StyleSheet, Pressable } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Pressable, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import COLORS from '../styles/constants';
+import { COLORS, constStyles } from '../styles/constants';
 
 import { useEffect } from 'react';
 import axios from 'axios';
@@ -77,6 +77,8 @@ export default function ProgressScreen() {
       </View>
 
       {/* Body */}
+      <Text style = {constStyles.title}>Progress</Text>
+      
       <View style={styles.body}>
         <Text style={styles.keepItUp}>Keep it up!</Text>
 
@@ -121,24 +123,11 @@ export default function ProgressScreen() {
           <Text style={styles.resetText}>Reset Progress Levels</Text>
         </Pressable>
       </View>
-
-      {/* Bottom Nav */}
-      <View style={styles.bottomNav}>
-        <View style={styles.navButtonActive}>
-          <Ionicons name="trophy-outline" size={20} color="black" />
-          <Text>Progress</Text>
-        </View>
-        <TouchableOpacity
-          style={styles.navButton}
-          onPress={() => router.push('/workout')}
-        >
-          <Ionicons name="barbell-outline" size={20} color="black" />
-          <Text>Workouts</Text>
-        </TouchableOpacity>
-      </View>
     </SafeAreaView>
   );
 }
+
+const screenWidth = Dimensions.get('window').width;
 
 const styles = StyleSheet.create({
   container: {
@@ -170,6 +159,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     alignSelf: 'flex-start',
     marginBottom: 20,
+    width: screenWidth - 50,
   },
   streakText: {
     color: 'white',
