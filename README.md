@@ -13,7 +13,7 @@
   npm install -g expo-cli
   ```
 - A device/emulator with Expo Go (iOS/Android)
-- Before running the app it is important to ask a tem memmber for the API keys, as the project wouldn't function without them.
+- API keys (ask a team member)
 
 ---
 
