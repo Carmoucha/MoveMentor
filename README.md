@@ -1,6 +1,6 @@
 # MoveMentor – Student Fitness Tracker App
 
-**MoveMentor** is a cross-platform mobile fitness app built with **React Native (Expo)**, designed to help university students maintain an active lifestyle. It features personalized workout recommendations, habit tracking, streaks, and progress feedback – all wrapped in a clean and simple user interface.
+**MoveMentor** is a cross-platform mobile fitness app built with **React Native (Expo)** and backed by a **Node.js + Express + MongoDB** server. It features personalized workout recommendations, habit tracking, streaks, and progress feedback.  It is designed to help university students maintain an active lifestyle by providing– all wrapped in a clean and simple user interface.
 
 ---
 
@@ -14,6 +14,7 @@
   ```
 - A device/emulator with Expo Go (iOS/Android)
 - API keys (ask a team member)
+
 
 ---
 
@@ -36,6 +37,12 @@ npm install
 cd backend
 npm install
 ```
+### 4. In the file MoveMentor/constants/IP.js replace the current IP with:
+
+- Your **local machine’s IP address** if you're using a real device (e.g., Expo Go).
+- Use `localhost` or `127.0.0.1` if you're testing in an emulator/simulator.
+
+
 
 ---
 
@@ -54,6 +61,7 @@ npx expo start
 ```
 - Scan the QR code with Expo Go OR
 - Press `i` for iOS / `a` for Android emulator
+
 
 ---
 
