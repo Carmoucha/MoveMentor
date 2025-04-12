@@ -77,3 +77,7 @@ npx expo start
 
 ## Demo video
 https://drive.google.com/file/d/1Jx4g2PnuoFyPEwjqbsafYjBlDepMx8c6/view?usp=sharing
+
+## Interactive Figma Prototype
+https://www.figma.com/proto/F0wb8pqM8gfic8whI898Y2/SOEN357-PROJECT?node-id=0-1&t=S8ynu1S3qAYQgDXl-1
+
