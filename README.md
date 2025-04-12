@@ -13,6 +13,7 @@
   npm install -g expo-cli
   ```
 - A device/emulator with Expo Go (iOS/Android)
+- Before running the app it is important to ask a tem memmber for the API keys, as the project wouldn't function without them.
 
 ---
 
@@ -56,49 +57,6 @@ npx expo start
 
 ---
 
-## 📂 Folder Structure (folders and files that have been added)
-
-```
-movementor/
-│
-├── MoveMentor/                   # Frontend folder (Expo App)
-│   ├── app/                      # Screens + navigation
-│   │   ├── (tabs)/               # Bottom tab navigation
-│   │   │   ├── progress.tsx      # Progress tracking
-│   │   │   └── workout.tsx       # Workout Screen
-|   |   |   └── index.tsx         # homeScreen
-│   │   ├── login.tsx             # Login screen
-│   │   ├── onboarding.tsx        # Onboarding questionnaire
-│   │   ├── dashboard.tsx         # Main dashboard view
-│   │
-│   ├── components/
-│   │   └── ui/                   # Reusable components
-│   │       ├── WorkoutCard.tsx   # Card UI for a workout
-│   │       ├── ProgressBar.tsx   # Progress indicator 
-│   │       ├── StreakBadge.tsx   # Badge for streaks
-│   │       ├── Header.tsx        # Reusable header or nav
-│   │    
-│   │
-│   ├── assets/                   # Fonts, icons, images
-│   ├── constants/                # Color, size, etc.
-│   ├── hooks/                    # Custom hooks
-|   |   ├── useUserPreferences.ts #  Store/retrieve onboarding data   
-│   ├── util/                    
-|   |   ├── validateForm.ts #  Store/retrieve onboarding data   
-
-
-├── backend/                    # Minimal backend API
-│   ├── server.js               # Express app entry
-│   ├── routes/
-│   │   ├── workouts.js         # `GET /workouts`
-│   │   └── users.js            # `POST /preferences`
-│   ├── data/
-│   │   └── workouts.json       # Static workouts
-
-```
-
----
-
 ## 💡 App Features
 
 - Login & onboarding flow
@@ -106,3 +64,8 @@ movementor/
 - Visual feedback: streaks, goals, progress bar
 - Gamification: badges and engagement rewards
 - Simple and fast UI/UX
+
+---
+
+## Demo video
+https://drive.google.com/file/d/1N9pADNTeeJJM9SRwZ1k3Cxr1kvrhmtuA/view?usp=sharing
