@@ -68,4 +68,4 @@ npx expo start
 ---
 
 ## Demo video
-https://drive.google.com/file/d/1N9pADNTeeJJM9SRwZ1k3Cxr1kvrhmtuA/view?usp=sharing
+https://drive.google.com/file/d/1Jx4g2PnuoFyPEwjqbsafYjBlDepMx8c6/view?usp=sharing
